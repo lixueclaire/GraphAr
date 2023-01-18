@@ -30,7 +30,7 @@ import org.apache.spark.sql.connector.read.PartitionReaderFactory
 import org.apache.spark.sql.execution.PartitionedFileUtil
 import org.apache.spark.sql.execution.datasources.{FilePartition, PartitioningAwareFileIndex, PartitionedFile}
 import org.apache.spark.sql.execution.datasources.csv.CSVDataSource
-import org.apache.spark.sql.execution.datasources.parquet.{ParquetOptions, ParquetReadSupport, ParquetWriteSupport}
+import org.apache.spark.sql.execution.datasources.parquet.{ParquetReadSupport, ParquetWriteSupport}
 import org.apache.spark.sql.execution.datasources.v2.FileScan
 import org.apache.spark.sql.execution.datasources.v2.parquet.ParquetPartitionReaderFactory
 import org.apache.spark.sql.execution.datasources.v2.orc.OrcPartitionReaderFactory
@@ -137,15 +137,8 @@ case class GarScan(
 
     val broadcastedConf = sparkSession.sparkContext.broadcast(
       new SerializableConfiguration(hadoopConf))
-    val sqlConf = sparkSession.sessionState.conf
-    ParquetPartitionReaderFactory(
-      sqlConf,
-      broadcastedConf,
-      dataSchema,
-      readDataSchema,
-      readPartitionSchema,
-      pushedFilters,
-      new ParquetOptions(options.asCaseSensitiveMap.asScala.toMap, sqlConf))
+    ParquetPartitionReaderFactory(sparkSession.sessionState.conf, broadcastedConf,
+      dataSchema, readDataSchema, readPartitionSchema, pushedFilters)
   }
 
   /**

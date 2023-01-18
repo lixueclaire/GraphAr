@@ -20,16 +20,16 @@ import scala.collection.JavaConverters._
 import org.apache.hadoop.fs.FileStatus
 
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.connector.write.{LogicalWriteInfo, Write, WriteBuilder}
+import org.apache.spark.sql.connector.write.{LogicalWriteInfo, WriteBuilder}
 import org.apache.spark.sql.catalyst.csv.CSVOptions
 import org.apache.spark.sql.execution.datasources.FileFormat
 import org.apache.spark.sql.execution.datasources.csv.CSVDataSource
 import org.apache.spark.sql.execution.datasources.orc.OrcUtils
 import org.apache.spark.sql.execution.datasources.parquet.ParquetUtils
 import org.apache.spark.sql.execution.datasources.v2.FileTable
-import org.apache.spark.sql.execution.datasources.v2.csv.CSVWrite
-import org.apache.spark.sql.execution.datasources.v2.orc.OrcWrite
-import org.apache.spark.sql.execution.datasources.v2.parquet.ParquetWrite
+import org.apache.spark.sql.execution.datasources.v2.csv.CSVWriteBuilder
+import org.apache.spark.sql.execution.datasources.v2.orc.OrcWriteBuilder
+import org.apache.spark.sql.execution.datasources.v2.parquet.ParquetWriteBuilder
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
@@ -64,15 +64,9 @@ case class GarTable(
     
   /** Construct a new write builder according to the actual file format. */
   override def newWriteBuilder(info: LogicalWriteInfo): WriteBuilder = formatName match {
-    case "csv" => new WriteBuilder {
-      override def build(): Write = CSVWrite(paths, formatName, supportsDataType, info)
-    }
-    case "orc" => new WriteBuilder {
-      override def build(): Write = OrcWrite(paths, formatName, supportsDataType, info)
-    }
-    case "parquet" => new WriteBuilder {
-      override def build(): Write = ParquetWrite(paths, formatName, supportsDataType, info)
-    }
+    case "csv" =>  new CSVWriteBuilder(paths, formatName, supportsDataType, info)
+    case "orc" => new OrcWriteBuilder(paths, formatName, supportsDataType, info)
+    case "parquet" => new ParquetWriteBuilder(paths, formatName, supportsDataType, info)
     case _ => throw new IllegalArgumentException
   }
 
