@@ -101,6 +101,13 @@ long long int grin_get_timestamp64_from_row(GRIN_GRAPH g, GRIN_ROW r,  // NOLINT
   return std::any_cast<int64_t>((*_r)[idx]);
 }
 
+const float* grin_get_float_array_from_row(GRIN_GRAPH g, GRIN_ROW r,
+                                           size_t idx) {
+  auto _r = static_cast<GRIN_ROW_T*>(r);
+  __grin_check_row(_r, NULL);
+  return std::any_cast<const float*>((*_r)[idx]);
+}
+
 GRIN_ROW grin_create_row(GRIN_GRAPH g) {
   auto r = new GRIN_ROW_T();
   return r;
@@ -167,6 +174,11 @@ bool grin_insert_timestamp64_to_row(GRIN_GRAPH g, GRIN_ROW r,
   auto _r = static_cast<GRIN_ROW_T*>(r);
   _r->push_back(value);
   return true;
+}
+
+bool grin_insert_float_array_to_row(GRIN_GRAPH g, GRIN_ROW r,
+                                    const float* value, size_t size) {
+  return false;  // insert float array to row is not supported
 }
 #endif
 

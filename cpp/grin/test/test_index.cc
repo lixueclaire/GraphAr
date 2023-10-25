@@ -19,8 +19,8 @@ limitations under the License.
 #include "grin/test/config.h"
 
 // GRIN headers
-#include "index/internal_id.h"
 #include "index/external_id.h"
+#include "index/internal_id.h"
 #include "index/order.h"
 #include "property/topology.h"
 #include "property/type.h"

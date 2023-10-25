@@ -71,4 +71,13 @@ static const std::string TEST_DATA_SMALL_PATH =  // NOLINT
         .string() +
     "/testing/ldbc_sample/parquet/ldbc_sample.graph.yml";
 
+static const std::string TEST_DATA_GLE_PATH =  // NOLINT
+    std::filesystem::path(__FILE__)
+        .parent_path()
+        .parent_path()
+        .parent_path()
+        .parent_path()
+        .string() +
+    "/testing/gle_graph/gle_graph.graph.yml";
+
 #endif  // CPP_GRIN_TEST_CONFIG_H_

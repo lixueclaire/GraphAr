@@ -42,6 +42,11 @@ limitations under the License.
 
 void grin_destroy_string_value(GRIN_GRAPH g, const char* value) { return; }
 
+void grin_destroy_float_array_value(GRIN_GRAPH g, const float* value) {
+  delete[] value;
+  return;
+}
+
 #ifdef GRIN_WITH_VERTEX_PROPERTY_NAME
 const char* grin_get_vertex_property_name(GRIN_GRAPH g, GRIN_VERTEX_TYPE vtype,
                                           GRIN_VERTEX_PROPERTY vp) {
@@ -242,6 +247,38 @@ long long int grin_get_vertex_property_value_of_timestamp64(  // NOLINT
   return _v->vertex.value().property<int64_t>(property.name).value();
 }
 
+const float* grin_get_vertex_property_value_of_float_array(
+    GRIN_GRAPH g, GRIN_VERTEX v, GRIN_VERTEX_PROPERTY vp) {
+  auto _g = static_cast<GRIN_GRAPH_T*>(g);
+  auto _v = static_cast<GRIN_VERTEX_T*>(v);
+  auto& property = _g->vertex_properties[vp];
+  __grin_check_vertex_property(_v, NULL);
+  __grin_get_gar_vertex(_v);
+  auto vtype = _v->type_id;
+  auto size = _g->vertex_property_offsets[vtype + 1] -
+              _g->vertex_property_offsets[vtype];
+  auto value = new float[size];
+  for (auto i = 0; i < size; ++i) {
+    auto vp_handle = _g->vertex_property_offsets[vtype] + i;
+    auto& property = _g->vertex_properties[vp_handle];
+    try {  // try float
+      value[i] = _v->vertex.value().property<float>(property.name).value();
+    } catch (std::exception& e) {
+      try {  // try double
+        value[i] = _v->vertex.value().property<double>(property.name).value();
+      } catch (std::exception& e) {
+        try {  // try int64_t
+          value[i] = _v->vertex.value().property<int64_t>(property.name).value();
+        } catch (std::exception& e) {
+          delete[] value;
+          return NULL;
+        }
+      }
+    }
+  }
+  return value;
+}
+
 GRIN_VERTEX_TYPE grin_get_vertex_type_from_property(GRIN_GRAPH g,
                                                     GRIN_VERTEX_PROPERTY vp) {
   auto _g = static_cast<GRIN_GRAPH_T*>(g);
@@ -357,6 +394,37 @@ long long int grin_get_edge_property_value_of_timestamp64(  // NOLINT
   auto& property = _g->edge_properties[ep];
   __grin_check_edge_property(_e, 0);
   return _e->edge.property<int64_t>(property.name).value();
+}
+
+const float* grin_get_edge_property_value_of_float_array(
+    GRIN_GRAPH g, GRIN_EDGE e, GRIN_EDGE_PROPERTY ep) {
+  auto _g = static_cast<GRIN_GRAPH_T*>(g);
+  auto _e = static_cast<GRIN_EDGE_T*>(e);
+  auto& property = _g->edge_properties[ep];
+  __grin_check_edge_property(_e, NULL);
+  auto etype = grin_get_edge_type_from_property(g, ep);
+  auto size =
+      _g->edge_property_offsets[etype + 1] - _g->edge_property_offsets[etype];
+  float* value = new float[size];
+  for (auto i = 0; i < size; ++i) {
+    auto ep_handle = _g->edge_property_offsets[etype] + i;
+    auto& property = _g->edge_properties[ep_handle];
+    try {  // try float
+      value[i] = _e->edge.property<float>(property.name).value();
+    } catch (std::exception& e) {
+      try {  // try double
+        value[i] = _e->edge.property<double>(property.name).value();
+      } catch (std::exception& e) {
+        try {  // try int64_t
+          value[i] = _e->edge.property<int64_t>(property.name).value();
+        } catch (std::exception& e) {
+          delete[] value;
+          return NULL;
+        }
+      }
+    }
+  }
+  return value;
 }
 
 GRIN_EDGE_TYPE grin_get_edge_type_from_property(GRIN_GRAPH g,
