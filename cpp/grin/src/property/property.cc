@@ -255,24 +255,31 @@ const float* grin_get_vertex_property_value_of_float_array(
   __grin_check_vertex_property(_v, NULL);
   __grin_get_gar_vertex(_v);
   auto vtype = _v->type_id;
-  auto size = _g->vertex_property_offsets[vtype + 1] -
-              _g->vertex_property_offsets[vtype];
+  auto tot = _g->vertex_property_offsets[vtype + 1] -
+             _g->vertex_property_offsets[vtype];
+  auto size = 0;
+  for (auto i = _g->vertex_property_offsets[vtype];
+       i < _g->vertex_property_offsets[vtype + 1]; ++i) {
+    auto& property = _g->vertex_properties[i];
+    if (property.type == GRIN_DATATYPE::Float) {
+      size++;
+    }
+  }
   auto value = new float[size];
-  for (auto i = 0; i < size; ++i) {
+  for (auto i = 0; i < tot; ++i) {
     auto vp_handle = _g->vertex_property_offsets[vtype] + i;
     auto& property = _g->vertex_properties[vp_handle];
+    if (property.type != GRIN_DATATYPE::Float) {
+      continue;
+    }
     try {  // try float
       value[i] = _v->vertex.value().property<float>(property.name).value();
     } catch (std::exception& e) {
       try {  // try double
         value[i] = _v->vertex.value().property<double>(property.name).value();
       } catch (std::exception& e) {
-        try {  // try int64_t
-          value[i] = _v->vertex.value().property<int64_t>(property.name).value();
-        } catch (std::exception& e) {
-          delete[] value;
-          return NULL;
-        }
+        delete[] value;
+        return NULL;
       }
     }
   }
@@ -403,24 +410,31 @@ const float* grin_get_edge_property_value_of_float_array(
   auto& property = _g->edge_properties[ep];
   __grin_check_edge_property(_e, NULL);
   auto etype = grin_get_edge_type_from_property(g, ep);
-  auto size =
+  auto tot =
       _g->edge_property_offsets[etype + 1] - _g->edge_property_offsets[etype];
+  auto size = 0;
+  for (auto i = _g->edge_property_offsets[etype];
+       i < _g->edge_property_offsets[etype + 1]; ++i) {
+    auto& property = _g->edge_properties[i];
+    if (property.type == GRIN_DATATYPE::Float) {
+      size++;
+    }
+  }
   float* value = new float[size];
-  for (auto i = 0; i < size; ++i) {
+  for (auto i = 0; i < tot; ++i) {
     auto ep_handle = _g->edge_property_offsets[etype] + i;
     auto& property = _g->edge_properties[ep_handle];
+    if (property.type != GRIN_DATATYPE::Float) {
+      continue;
+    }
     try {  // try float
       value[i] = _e->edge.property<float>(property.name).value();
     } catch (std::exception& e) {
       try {  // try double
         value[i] = _e->edge.property<double>(property.name).value();
       } catch (std::exception& e) {
-        try {  // try int64_t
-          value[i] = _e->edge.property<int64_t>(property.name).value();
-        } catch (std::exception& e) {
-          delete[] value;
-          return NULL;
-        }
+        delete[] value;
+        return NULL;
       }
     }
   }

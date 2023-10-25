@@ -71,6 +71,7 @@ void test_vertex_property_float_array(GRIN_GRAPH graph) {
   auto property_size = grin_get_vertex_property_list_size(graph, property_list);
   // get property from property list
   auto property = grin_get_vertex_property_from_list(graph, property_list, 0);
+  auto label = grin_get_vertex_property_by_name(graph, vertex_type, "label");
 
   for (auto i = 0; i < vertex_size; i++) {
     // get vertex from vertex list
@@ -79,10 +80,13 @@ void test_vertex_property_float_array(GRIN_GRAPH graph) {
     auto value =
         grin_get_vertex_property_value_of_float_array(graph, vertex, property);
     ASSERT(value != NULL);
-    for (auto j = 0; j < property_size; j++) {
+    for (auto j = 0; j < property_size - 1; j++) {
       std::cout << "value[" << j << "] = " << value[j] << " ";
     }
-    std::cout << std::endl;
+    // print label
+    auto label_value =
+        grin_get_vertex_property_value_of_int64(graph, vertex, label);
+    std::cout << ", label = " << label_value << std::endl;
     // destroy
     grin_destroy_float_array_value(graph, value);
     grin_destroy_vertex(graph, vertex);
@@ -90,6 +94,7 @@ void test_vertex_property_float_array(GRIN_GRAPH graph) {
 
   // destroy
   grin_destroy_vertex_property(graph, property);
+  grin_destroy_vertex_property(graph, label);
   grin_destroy_vertex_property_list(graph, property_list);
   grin_destroy_vertex_list(graph, select_vertex_list);
   grin_destroy_vertex_type(graph, vertex_type);
